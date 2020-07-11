@@ -1,0 +1,101 @@
+<!doctype html>
+<html>
+<head>
+
+<title>GG-chess</title>
+
+<link rel="stylesheet" type="text/css" href="static/chessboard.min.css">
+
+<script src="static/jquery.min.js"></script>
+<script src="static/chessboard.min.js"></script>
+
+</head>
+<style>
+body,html {
+  background-image: url("bg.jpg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  height: 100%;text-align: center;
+}
+.container {
+    position:fixed;
+    top: 30%;
+    left: 50%;
+    width:30em;
+    height:18em;
+    margin-top: -9em;
+    margin-left: -15em; 
+
+}
+.button {
+  background-color: white;
+  color: black;
+  border: 2px solid #000000;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+.button:hover {background-color: #D4AF37}
+
+.button:active {
+  transform: translateY(4px);
+}
+</style>
+
+<body style="font-size: 20px;">
+<div class="container">
+<button class="button" onclick="newGame()">New Game</button><br/>
+<div id="board" style="width: 600px"></div>
+</div>
+
+
+<p></p>
+
+
+
+
+
+<script type="text/javascript">
+
+var board = ChessBoard('board', {
+  position: 'start',
+  draggable: true,
+  onDrop: onDrop
+});
+
+var files = {"a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7};
+function get_square(sq) {
+  return 8*(parseInt(sq.charAt(1)) - 1) + files[sq.charAt(0)];
+}
+
+
+function onDrop(source, target, piece) {
+  if(source == target) return
+
+  var promotion = piece.toLowerCase().charAt(1) == 'p' && parseInt(target.charAt(1)) == 8;
+
+  $.get('/move_coordinates', {'from': get_square(source), 'to': get_square(target), 'promotion': promotion}, function(r) {
+    if (r.includes("game over")) {
+      document.querySelector('p').innerText = 'game over';
+    } else {
+      document.querySelector('p').innerText = '';
+      board.position(r);
+    }
+  });
+}
+
+function newGame() {
+  $.get('/newgame', function(r) {
+    document.querySelector('p').innerText = '';
+    board.position(r);
+  });
+}
+</script>
+
+</body>
+</html>
