@@ -1,6 +1,7 @@
 import numpy as np
 import chess
 
+#class dung may logic con co, tao ban co ao
 class State(object):
   def __init__(self, board=None):
     if board is None:
