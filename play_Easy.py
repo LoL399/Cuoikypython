@@ -9,6 +9,8 @@ from flask import Flask, Response, request, render_template
 import os
 
 MAXVAL = 10000
+
+#class danh gia gia tri con co
 class ClassicValuator(object):
     values = {chess.PAWN: 1,
             chess.KNIGHT: 3,
@@ -56,7 +58,7 @@ class ClassicValuator(object):
         
         return self.memo[key]
             
-
+#cac nuoc di
 def explore_leaves(s,v):
     ret=[]
     v.reset()   
@@ -68,10 +70,11 @@ def explore_leaves(s,v):
 
 #############################################################################################    
 v = ClassicValuator()
-#v = Valuator()
 s = State()
 
-def computer_minimax(s, v, depth=2):
+
+
+def computer_minimax(s, v, depth=4):
     if depth == 0 or s.board.is_game_over():
         return v(s)
 # white is maximizing player
@@ -91,24 +94,28 @@ def computer_minimax(s, v, depth=2):
         s.board.pop()
     return ret
 
+
+#tao cai ban co tren web
 def to_svg(s):
     return base64.b64encode(chess.svg.board(board = s.board).encode('utf-8')).decode('utf-8')
 
-app = Flask(__name__)
+
+#Xu ly giao dien
+app = Flask(__name__)\
+#tao ban co
 @app.route("/")
 def hello():
     ret = open("index.html").read()
     return ret.replace('start', s.board.fen())
-   
+ #pc di chuyen  
 def computer_move(s,v):
     move = sorted(explore_leaves(s, v),key=lambda x: x[0], reverse=s.board.turn)
     if len(move)==0:
         return 
     s.board.push(move[0][1])
+
+#di chuyen con co   
 @app.route("/move_coordinates")
-
-
-
 def move_coordinates():
     if not s.board.is_game_over():
       source = int(request.args.get('from', default=''))
@@ -129,6 +136,8 @@ def move_coordinates():
     response = app.response_class(response="game over",status=200)
     return response
 
+
+#taao game moi
 @app.route("/newgame")
 def newgame():
     s.board.reset()
@@ -146,7 +155,7 @@ def selfplay():
 
     return ret
 
-#pc vs player
+#xu ly khi nguoi choi di
 @app.route("/move")
 def move():
     if not s.board.is_game_over():
@@ -154,18 +163,18 @@ def move():
         if move is not None and move !="":
             print("Human moves",move)
             try:
-                s.board.push_san(move)
-                computer_move(s,v)
+                s.board.push_san(move) 
+                computer_move(s,v)#thuc hien minimax
             except Exception:
                 traceback.print_exc()
                 response = app.response_class( response=s.board.fen(),status=200)
                 return response
     else:
-        print("GAME OVER")
+        print("GAME OVER") #gameover
         response = app.response_class(response="game over",status=200)
         return response
     return hello()
-       
+
 
 if __name__=="__main__":
     if os.getenv("SELF") is not None:
